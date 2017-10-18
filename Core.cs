@@ -3,6 +3,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -32,9 +35,9 @@ namespace ConnectionSwitcher
         {
             base.WndProc(ref m);
             if (!_succeded) return;
-            if (m.Msg == 0x312) // WM_HOTKEY
+            if (m.Msg == 0x312) // WM_HOTKEY //TODO: As more hotkeys are gonna get added add a system to check which was pressed
             {
-                byte newConnection = (byte)(GetCurrentGateway()[3] == 254 ? 251 : 254);
+                byte newConnection = (byte)(GetCurrentGateway()[3] == 254 ? 251 : 254); //TODO: Make a config and add a list of ips and hotkeys there
                 int code = ChangeGateway(192, 168, 1, newConnection);
                 switch (code)
                 {
@@ -54,23 +57,13 @@ namespace ConnectionSwitcher
             }
         }
 
-        private static byte[] GetCurrentGateway()
-        {
-            ManagementClass mc = new ManagementClass("Win32_NetworkAdapterConfiguration");
-            ManagementObjectCollection moc = mc.GetInstances();
-
-            foreach (var mo in moc)
-            {
-                //TODO: Check which of the adapters has internet access and get the gateway
-                if (Equals(mo["Description"], "Killer E2500 Gigabit Ethernet Controller")) 
-                {
-                    if (!(mo.GetPropertyValue("DefaultIPGateway") is string[] original))
-                        return null;
-                    return original[0].Split('.').Select(x => Convert.ToByte(x)).ToArray();
-                }
-            }
-            return null;
-        }
+        private static byte[] GetCurrentGateway() => NetworkInterface.GetAllNetworkInterfaces()
+                .Where(x => x.OperationalStatus == OperationalStatus.Up ||
+                            x.OperationalStatus == OperationalStatus.Down)
+                .Where(x => x.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .SelectMany(x => x.GetIPProperties()?.GatewayAddresses)
+                .Select(x => x?.Address)
+                .FirstOrDefault(x => x?.AddressFamily == AddressFamily.InterNetwork)?.GetAddressBytes();
 
         private static int ChangeGateway(byte first, byte second, byte third, byte fourth)
         {
