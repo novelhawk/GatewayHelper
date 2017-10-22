@@ -2,10 +2,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Management;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -13,6 +12,7 @@ namespace ConnectionSwitcher
 {
     public class Core : Form
     {
+        private int _id = 1;
         private NotifyIcon itemTray;
         private IContainer components;
         private bool _succeded;
@@ -20,14 +20,15 @@ namespace ConnectionSwitcher
         public Core()
         {
             InitializeComponent();
-            CreateHotkey();
+            CreateHotkey(Modifiers.Control | Modifiers.Shift, Keys.O);
+            CreateHotkey(0, Keys.F11);
         }
 
-        private void CreateHotkey()
+        private void CreateHotkey(Modifiers modifiers, Keys key)
         {
-            if (RegisterHotKey(Handle, 0, 16390, 79))
+            if (RegisterHotKey(Handle, _id++, (uint)modifiers, (uint)key))
                 _succeded = true;
-            else
+            else 
                 throw new Exception("Error creating the hotkey");
         }
 
@@ -35,23 +36,36 @@ namespace ConnectionSwitcher
         {
             base.WndProc(ref m);
             if (!_succeded) return;
-            if (m.Msg == 0x312) // WM_HOTKEY //TODO: As more hotkeys are gonna get added add a system to check which was pressed
+            if (m.Msg == 0x312) // WM_HOTKEY
             {
-                byte newConnection = (byte)(GetCurrentGateway()[3] == 254 ? 251 : 254); //TODO: Make a config and add a list of ips and hotkeys there
-                int code = ChangeGateway(192, 168, 1, newConnection);
-                switch (code)
+                //TODO: Change balloons to custom GUI
+                switch (m.WParam.ToInt32())
                 {
-                    case 0:
-                        itemTray.ShowBalloonTip(100, "Connection Switch", $"Now on 192.168.1.{newConnection}", ToolTipIcon.None);
-                        break;
                     case 1:
-                        // Cancelled by user
+                        //TODO: Make a config and add a list of ips and hotkeys there
+                        byte newConnection = (byte) (GetCurrentGateway()[3] == 254 ? 251 : 254);
+                        int code = ChangeGateway(192, 168, 1, newConnection);
+                        switch (code)
+                        {
+                            case 0:
+                                itemTray.ShowBalloonTip(0, "Connection Switch", $"Now on 192.168.1.{newConnection}", ToolTipIcon.None);
+                                break;
+                            case 1:
+                                // Cancelled by user
+                                break;
+                            case 2:
+                                itemTray.ShowBalloonTip(0, "Connection Switcher", "You need admin authorization for change connection.", ToolTipIcon.Warning);
+                                break;
+                            default: // -1
+                                itemTray.ShowBalloonTip(0, "Connection Switcher", "Unhandled error occurred", ToolTipIcon.Error);
+                                break;
+                        }
                         break;
                     case 2:
-                        itemTray.ShowBalloonTip(100, "Connection Switcher", "You need admin authorization for change connection.", ToolTipIcon.Warning);
+                        itemTray.ShowBalloonTip(0, "Connection Switcher", string.Format("Currently on {0}.{1}.{2}.{3}", GetCurrentGateway().Select(x => x.ToString()).ToArray<object>()), ToolTipIcon.None);
                         break;
-                    default: // -1
-                        itemTray.ShowBalloonTip(100, "Connection Switcher", "Unhandled error occurred", ToolTipIcon.Error);
+                    default:
+                        // Shouldn't ever be called
                         break;
                 }
             }
@@ -114,7 +128,6 @@ namespace ConnectionSwitcher
             // itemTray
             // 
             this.itemTray.Icon = ((System.Drawing.Icon)(resources.GetObject("itemTray.Icon")));
-            this.itemTray.Text = "Connection Switcher";
             this.itemTray.Visible = true;
             this.itemTray.DoubleClick += OnItemTrayDoubleClick;
             // 
