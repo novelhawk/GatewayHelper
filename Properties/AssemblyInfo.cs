@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // Le informazioni generali relative a un assembly sono controllate dal seguente 
 // set di attributi. Modificare i valori di questi attributi per modificare le informazioni
 // associate a un assembly.
-[assembly: AssemblyTitle("ConnectionSwitcher")]
+[assembly: AssemblyTitle("Connection Switcher")]
 [assembly: AssemblyDescription("Changes between multiple gateways by pressing a hotkey.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("HDLClan")]
