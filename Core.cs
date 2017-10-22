@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -12,7 +11,7 @@ namespace ConnectionSwitcher
 {
     public class Core : Form
     {
-        private int _id = 1;
+        private int _id;
         private NotifyIcon itemTray;
         private IContainer components;
         private bool _succeded;
@@ -20,8 +19,8 @@ namespace ConnectionSwitcher
         public Core()
         {
             InitializeComponent();
-            CreateHotkey(Modifiers.Control | Modifiers.Shift, Keys.O);
-            CreateHotkey(0, Keys.F11);
+            CreateHotkey(Modifiers.Control, Keys.F11); // Switch connection
+            CreateHotkey(Modifiers.Control, Keys.F12); // Check current connection
         }
 
         private void CreateHotkey(Modifiers modifiers, Keys key)
@@ -41,7 +40,7 @@ namespace ConnectionSwitcher
                 //TODO: Change balloons to custom GUI
                 switch (m.WParam.ToInt32())
                 {
-                    case 1:
+                    case 0:
                         //TODO: Make a config and add a list of ips and hotkeys there
                         byte newConnection = (byte) (GetCurrentGateway()[3] == 254 ? 251 : 254);
                         int code = ChangeGateway(192, 168, 1, newConnection);
@@ -54,19 +53,18 @@ namespace ConnectionSwitcher
                                 // Cancelled by user
                                 break;
                             case 2:
-                                itemTray.ShowBalloonTip(0, "Connection Switcher", "You need admin authorization for change connection.", ToolTipIcon.Warning);
+                                itemTray.ShowBalloonTip(0, "Connection Switcher", "You must have admin rights to change connection.", ToolTipIcon.Warning);
                                 break;
                             default: // -1
                                 itemTray.ShowBalloonTip(0, "Connection Switcher", "Unhandled error occurred", ToolTipIcon.Error);
                                 break;
                         }
                         break;
-                    case 2:
+                    case 1:
                         itemTray.ShowBalloonTip(0, "Connection Switcher", string.Format("Currently on {0}.{1}.{2}.{3}", GetCurrentGateway().Select(x => x.ToString()).ToArray<object>()), ToolTipIcon.None);
                         break;
                     default:
-                        // Shouldn't ever be called
-                        break;
+                        throw new Exception($"Unhandled hotkey. (ID: {m.WParam})");
                 }
             }
         }
@@ -97,7 +95,7 @@ namespace ConnectionSwitcher
             {
                 p.Start();
             }
-            catch (Win32Exception) // Could be caused by something else... Using OperationCanceledException 2hard
+            catch (Win32Exception) // Could probably be caused by something else... Using OperationCanceledException 2hard
             {
                 return 1; // Cancelled by user
             }
