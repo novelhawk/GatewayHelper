@@ -11,61 +11,85 @@ namespace ConnectionSwitcher
 {
     public class Core : Form
     {
-        private int _id;
+        private const int WM_HOTKEY = 786;
         private NotifyIcon itemTray;
         private IContainer components;
-        private bool _succeded;
+        private int _id;
 
         public Core()
         {
+#if !DEBUG
+            var processes = Process.GetProcessesByName("ConnectionSwitcher");
+            if (processes.Length > 1)
+            {
+                switch (MessageBox.Show(
+                    "Other instances of the program are already running. Do you want to kill them and proceed with this one?",
+                    "Process is already running", MessageBoxButtons.YesNo, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1))
+                {
+                    case DialogResult.No:
+                        Environment.Exit(0);
+                        return;
+                    default:
+                        foreach (Process process in processes)
+                            process.Kill();
+                        break;
+                }
+            }
+#endif
+
             InitializeComponent();
-            CreateHotkey(Modifiers.Control, Keys.F11); // Switch connection
-            CreateHotkey(Modifiers.Control, Keys.F12); // Check current connection
+            CreateHotkey(Modifiers.Control, Keys.F11);
+            CreateHotkey(Modifiers.Control, Keys.F12);
         }
 
         private void CreateHotkey(Modifiers modifiers, Keys key)
         {
-            if (RegisterHotKey(Handle, _id++, (uint)modifiers, (uint)key))
-                _succeded = true;
-            else 
+            if (!RegisterHotKey(Handle, _id++, (uint)modifiers, (uint)key))
                 throw new Exception("Error creating the hotkey");
         }
 
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
-            if (!_succeded) return;
-            if (m.Msg == 0x312) // WM_HOTKEY
+            if (m.Msg != WM_HOTKEY) return;
+
+            //TODO: Change balloons to custom GUI
+            switch (m.WParam.ToInt32())
             {
-                //TODO: Change balloons to custom GUI
-                switch (m.WParam.ToInt32())
+                case 0:
                 {
-                    case 0:
-                        //TODO: Make a config and add a list of ips and hotkeys there
-                        byte newConnection = (byte) (GetCurrentGateway()[3] == 254 ? 251 : 254);
-                        int code = ChangeGateway(192, 168, 1, newConnection);
-                        switch (code)
-                        {
-                            case 0:
-                                itemTray.ShowBalloonTip(0, "Connection Switch", $"Now on 192.168.1.{newConnection}", ToolTipIcon.None);
-                                break;
-                            case 1:
-                                // Cancelled by user
-                                break;
-                            case 2:
-                                itemTray.ShowBalloonTip(0, "Connection Switcher", "You must have admin rights to change connection.", ToolTipIcon.Warning);
-                                break;
-                            default: // -1
-                                itemTray.ShowBalloonTip(0, "Connection Switcher", "Unhandled error occurred", ToolTipIcon.Error);
-                                break;
-                        }
-                        break;
-                    case 1:
-                        itemTray.ShowBalloonTip(0, "Connection Switcher", string.Format("Currently on {0}.{1}.{2}.{3}", GetCurrentGateway().Select(x => x.ToString()).ToArray<object>()), ToolTipIcon.None);
-                        break;
-                    default:
-                        throw new Exception($"Unhandled hotkey. (ID: {m.WParam})");
+                    //TODO: Make a config and add a list of ips and hotkeys there
+                    byte[] ip = GetCurrentGateway();
+                    ip[3] = ip[3] == 251 ? (byte) 254 : (byte) 251;
+                    switch (ChangeGateway(ip))
+                    {
+                        case 0:
+                            itemTray.ShowBalloonTip(0, "Connection Switch",
+                                $"Switched to {ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}", ToolTipIcon.None);
+                            break;
+                        case 1:
+                            // Cancelled by user
+                            break;
+                        case 2:
+                            itemTray.ShowBalloonTip(0, "Connection Switcher",
+                                "You must have admin rights to change connection.", ToolTipIcon.Warning);
+                            break;
+                        default: // -1
+                            itemTray.ShowBalloonTip(0, "Connection Switcher", "Unhandled error occurred",
+                                ToolTipIcon.Error);
+                            break;
+                    }
+                    break;
                 }
+                case 1:
+                {
+                    byte[] ip = GetCurrentGateway();
+                    itemTray.ShowBalloonTip(0, "Connection Switcher", $"Currently on {ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}",
+                        ToolTipIcon.None);
+                    break;
+                }
+                default:
+                    throw new Exception($"Unhandled hotkey. (ID: {m.WParam})");
             }
         }
 
@@ -77,7 +101,7 @@ namespace ConnectionSwitcher
                 .Select(x => x?.Address)
                 .FirstOrDefault(x => x?.AddressFamily == AddressFamily.InterNetwork)?.GetAddressBytes();
 
-        private static int ChangeGateway(byte first, byte second, byte third, byte fourth)
+        private static int ChangeGateway(byte[] ip)
         {
             Process p = new Process
             {
@@ -85,7 +109,7 @@ namespace ConnectionSwitcher
                 {
                     CreateNoWindow = true,
                     FileName = "cmd.exe",
-                    Arguments = $"/k route change 0.0.0.0 mask 0.0.0.0 {first}.{second}.{third}.{fourth} && exit",
+                    Arguments = $"/c route change 0.0.0.0 mask 0.0.0.0 {ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}",
                     UseShellExecute = true,
                     Verb = "runas",
                     WindowStyle = ProcessWindowStyle.Minimized,
@@ -95,9 +119,9 @@ namespace ConnectionSwitcher
             {
                 p.Start();
             }
-            catch (Win32Exception) // Could probably be caused by something else... Using OperationCanceledException 2hard
+            catch (Win32Exception)
             {
-                return 1; // Cancelled by user
+                return 1;
             }
             catch (Exception)
             {
@@ -110,6 +134,11 @@ namespace ConnectionSwitcher
             }
 
             return 0;
+        }
+
+        private static void OnItemTrayDoubleClick(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -138,11 +167,6 @@ namespace ConnectionSwitcher
             this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.ResumeLayout(false);
 
-        }
-
-        private static void OnItemTrayDoubleClick(object sender, EventArgs e)
-        {
-            Application.Exit();
         }
     }
 }
