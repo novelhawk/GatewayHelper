@@ -2,10 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectionSwitcher", "ConnectionSwitcher\ConnectionSwitcher.csproj", "{D5021980-08E0-4802-9C9B-0A9FF433C67D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedDLSupport", "AdvanceDLSupport\AdvancedDLSupport\AdvancedDLSupport.csproj", "{20FE0F2E-75F0-4F6E-9496-12FC66063096}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.DllMap", "AdvanceDLSupport\Mono.DllMap\Mono.DllMap.csproj", "{AD853321-5053-4285-A30A-1806F474816B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -16,13 +12,5 @@ Global
 		{D5021980-08E0-4802-9C9B-0A9FF433C67D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5021980-08E0-4802-9C9B-0A9FF433C67D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5021980-08E0-4802-9C9B-0A9FF433C67D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{20FE0F2E-75F0-4F6E-9496-12FC66063096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20FE0F2E-75F0-4F6E-9496-12FC66063096}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20FE0F2E-75F0-4F6E-9496-12FC66063096}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20FE0F2E-75F0-4F6E-9496-12FC66063096}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AD853321-5053-4285-A30A-1806F474816B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD853321-5053-4285-A30A-1806F474816B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AD853321-5053-4285-A30A-1806F474816B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AD853321-5053-4285-A30A-1806F474816B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
