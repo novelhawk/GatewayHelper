@@ -12,14 +12,14 @@ namespace ConnectionSwitcher
         int GetMessageA(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
         bool TranslateMessage(ref MSG lpMsg);
         IntPtr DispatchMessageA(ref MSG lpMsg);
-        bool RegisterHotKey(IntPtr hWnd, int id, KeyModifiers identifiers, Keys vk);
+        
         IntPtr SetWindowsHookExA(HookType hookType, HookProc lpfn, IntPtr hMod, uint dwThreadId);
         IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
     }
 
     public delegate IntPtr HookProc(int code, IntPtr wParam, IntPtr lParam);
     
-    public enum HookType : int
+    public enum HookType
     {
         WH_JOURNALRECORD = 0,  
         WH_JOURNALPLAYBACK = 1,
@@ -1231,15 +1231,14 @@ namespace ConnectionSwitcher
         HSHELL_WINDOWREPLACED = 13
     }
 
-
     [StructLayout(LayoutKind.Sequential)]
-    public class KBDLLHOOKSTRUCT
+    public class KeyInfo
     {
-        public Keys vkCode;
-        public uint scanCode;
-        public KBDLLHOOKSTRUCTFlags flags;
-        public uint time;
-        public UIntPtr dwExtraInfo;
+        public Keys KeyCode;
+        public uint ScanCode;
+        public KBDLLHOOKSTRUCTFlags Flags;
+        public uint Time;
+        public UIntPtr ExtraInfo;
     }
 
     [Flags]
@@ -1253,40 +1252,24 @@ namespace ConnectionSwitcher
     [StructLayout(LayoutKind.Sequential)]
     public struct MSG
     {
-        public IntPtr hwnd;
-        public uint message;
-        public UIntPtr wParam;
-        public IntPtr lParam;
-        public int time;
-        public POINT pt;
+        private IntPtr _handle;
+        private uint _message;
+        private UIntPtr _wParam;
+        private IntPtr _lParam;
+        private int _time;
+        private POINT _point;
 #if _MAC
-        public int lPrivate;
+        private int lPrivate;
 #endif
     }
     
     [StructLayout(LayoutKind.Sequential)]
     public struct POINT
     {
-        public int X;
-        public int Y;
-
-        public POINT(int x, int y)
-        {
-            this.X = x;
-            this.Y = y;
-        }
+        private int _x;
+        private int _y;
     }
     
-    [Flags]
-    public enum KeyModifiers
-    {
-        None = 0,
-        Alt = 1,
-        Control = 2,
-        Shift = 4,
-        Windows = 8
-    }
-
     public enum Keys
     {
         KeyCode = 65535, 
