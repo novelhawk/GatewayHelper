@@ -48,7 +48,7 @@ namespace ConnectionSwitcher
 
             if (_currentGateway == -1)
             {
-                Console.WriteLine("[WARNING] Current gateway ({0}) not present in the array. Switching to {1}", gateways[0], _gateways[0]);
+                Console.WriteLine("[WARNING] Current gateway {0} is not valid. Switching to {1}", gateways[0], _gateways[0]);
                 _currentGateway = 0;
                 InternalChangeGateway(_gateways[0]);
             }
