@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using ConnectionSwitcher.NativeLibraries;
 
 namespace ConnectionSwitcher
 {
     public class Switcher
     {
-        private readonly IIPHelper _ipHelper;
         private Gateway[] _gateways;
         private int _currentGateway;
 
-        public Switcher(IIPHelper ipHelper)
-        {
-            _ipHelper = ipHelper;
-        }
-        
         public void LoadGatewaysFromFile(string gateways)
         {
             //TODO: Load from file
@@ -74,38 +69,59 @@ namespace ConnectionSwitcher
             Console.WriteLine("[ERROR] Failed to change gateway to {0}", gateway);
         }
 
-        private bool InternalGetGateway(out Gateway[] gateways)
+        private static bool GetForwardTable(out IpForwardTable forwardTable)
         {
             const int ERROR_INSUFFICIENT_BUFFER = 122;
             const int NO_ERROR = 0;
 
-            gateways = new Gateway[0];
-
-            IntPtr tablePtr = IntPtr.Zero;
+            IntPtr buffer = IntPtr.Zero;
             IntPtr bufferSize = IntPtr.Zero;
-            var status = _ipHelper.GetIpForwardTable(tablePtr, ref bufferSize, false);
+
+            var status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
             if (status == ERROR_INSUFFICIENT_BUFFER)
             {
-                tablePtr = Marshal.AllocHGlobal(bufferSize);
-                status = _ipHelper.GetIpForwardTable(tablePtr, ref bufferSize, false);
+                buffer = Marshal.AllocHGlobal(bufferSize);
+                status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
             }
-
+            
             if (status != NO_ERROR)
             {
-                Console.WriteLine("[ERROR] Failed to get forward table.");
-                if (tablePtr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(tablePtr);
+                if (buffer != IntPtr.Zero)
+                    Marshal.FreeHGlobal(buffer);
+                forwardTable = default;
                 return false;
             }
 
-            var forwardTable = Marshal.PtrToStructure<IpForwardTable>(tablePtr);
-            forwardTable.table = new IpForwardRow[forwardTable.Size];
+            forwardTable = new IpForwardTable();
+            forwardTable.Size = (uint) Marshal.ReadInt32(buffer);
+            forwardTable.Table = new IpForwardRow[forwardTable.Size];
+
+            IntPtr currentIndex = buffer + Marshal.SizeOf<uint>();
             for (int i = 0; i < forwardTable.Size; i++)
-                forwardTable.table[i] = Marshal.PtrToStructure<IpForwardRow>(tablePtr + Marshal.SizeOf(forwardTable.Size) + i * Marshal.SizeOf<IpForwardRow>());
+            {
+                forwardTable.Table[i] = Marshal.PtrToStructure<IpForwardRow>(currentIndex);
+                currentIndex += Marshal.SizeOf<IpForwardRow>();
+            }
+            
+            if (buffer != IntPtr.Zero)
+                Marshal.FreeHGlobal(buffer);
+
+            return true;
+        }
+
+        private static bool InternalGetGateway(out Gateway[] gateways)
+        {
+            gateways = new Gateway[0];
+
+            if (!GetForwardTable(out IpForwardTable forwardTable))
+            {
+                Console.WriteLine("[ERROR] Failed to get forward table.");
+                return false;
+            }
             
             for (int i = 0; i < forwardTable.Size; i++)
             {
-                var row = forwardTable.table[i];
+                var row = forwardTable.Table[i];
                 if (row.dwForwardDest == 0)
                 {
                     if (gateways.Length == 0)
@@ -121,55 +137,34 @@ namespace ConnectionSwitcher
                 }
             }
 
-            if (tablePtr != IntPtr.Zero)
-                Marshal.FreeHGlobal(tablePtr);
             return gateways.Length > 0;
         }
 
-        private bool InternalChangeGateway(in Gateway gateway)
+        private static bool InternalChangeGateway(in Gateway gateway)
         {
-            const int ERROR_INSUFFICIENT_BUFFER = 122;
             const int NO_ERROR = 0;
-
-            IntPtr tablePtr = IntPtr.Zero;
-            IntPtr bufferSize = IntPtr.Zero;
-            var status = _ipHelper.GetIpForwardTable(tablePtr, ref bufferSize, false);
-            if (status == ERROR_INSUFFICIENT_BUFFER)
-            {
-                tablePtr = Marshal.AllocHGlobal(bufferSize);
-                status = _ipHelper.GetIpForwardTable(tablePtr, ref bufferSize, false);
-            }
-
-            if (status != NO_ERROR)
+            
+            if (!GetForwardTable(out IpForwardTable forwardTable))
             {
                 Console.WriteLine("[ERROR] Failed to get forward table.");
-                if (tablePtr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(tablePtr);
                 return false;
             }
-
-            var forwardTable = Marshal.PtrToStructure<IpForwardTable>(tablePtr);
-            forwardTable.table = new IpForwardRow[forwardTable.Size];
-            for (int i = 0; i < forwardTable.Size; i++)
-                forwardTable.table[i] = Marshal.PtrToStructure<IpForwardRow>(tablePtr + Marshal.SizeOf(forwardTable.Size) + i * Marshal.SizeOf<IpForwardRow>());
             
+            int status;
             IpForwardRow? currentGateway = null;
-            
             for (int i = 0; i < forwardTable.Size; i++)
             {
-                var row = forwardTable.table[i];
+                var row = forwardTable.Table[i];
                 if (row.dwForwardDest == 0)
                 {
                     if (currentGateway == null)
                         currentGateway = row;
                         
-                    status = _ipHelper.DeleteIpForwardEntry(ref forwardTable.table[i]);
+                    status = NativeLibrary.IPHelper.DeleteIpForwardEntry(ref forwardTable.Table[i]);
 
                     if (status != NO_ERROR)
                     {
                         Console.WriteLine("[ERROR] Could not delete old gateway entry. (Win32Error: {0})", status);
-                        if (tablePtr != IntPtr.Zero)
-                            Marshal.FreeHGlobal(tablePtr);
                         return false;
                     }
                 }
@@ -178,69 +173,20 @@ namespace ConnectionSwitcher
             if (!currentGateway.HasValue)
             {
                 Console.WriteLine("[ERROR] Could not find any gateway to change");
-                if (tablePtr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(tablePtr);
                 return false;
             }
 
             var current = currentGateway.Value;
             current.dwForwardNextHop = gateway;
             
-            status = _ipHelper.CreateIpForwardEntry(ref current);
+            status = NativeLibrary.IPHelper.CreateIpForwardEntry(ref current);
 
             if (status != NO_ERROR)
                 Console.WriteLine("[ERROR] CreateIpForwardEntry failed with code {0}", status);
-            
-            if (tablePtr != IntPtr.Zero)
-                Marshal.FreeHGlobal(tablePtr);
             
             return status == NO_ERROR;
         }
 
         public Gateway Gateway => _gateways[_currentGateway];
-    }
-
-    public struct Gateway : IEquatable<Gateway>
-    {
-        private readonly byte[] _bytes;
-
-        public Gateway(byte first, byte second, byte third, byte fourth)
-        {
-            _bytes = new[]
-            {
-                first, second, third, fourth
-            };
-        }
-
-        public Gateway(uint ip)
-        {
-            _bytes = BitConverter.GetBytes(ip);
-        }
-        
-        public static implicit operator uint(Gateway gateway)
-        {
-            return BitConverter.ToUInt32(gateway._bytes, 0);
-        }
-
-        public override string ToString()
-        {
-            return $"{_bytes[0]}.{_bytes[1]}.{_bytes[2]}.{_bytes[3]}";
-        }
-
-        public bool Equals(Gateway other)
-        {
-            return Equals(_bytes, other._bytes);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            return obj is Gateway gateway && Equals(gateway);
-        }
-
-        public override int GetHashCode()
-        {
-            return _bytes != null ? _bytes.GetHashCode() : 0;
-        }
     }
 }

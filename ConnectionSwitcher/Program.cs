@@ -7,7 +7,6 @@ namespace ConnectionSwitcher
         public static void Main(string[] args)
         {
             var core = new Core();
-            core.ApplicationLoop();
             Console.ReadKey();
         }
     }

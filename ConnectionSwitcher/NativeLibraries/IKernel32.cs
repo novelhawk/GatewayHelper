@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConnectionSwitcher
+namespace ConnectionSwitcher.NativeLibraries
 {
     public interface IKernel32
     {

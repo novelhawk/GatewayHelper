@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-// ReSharper disable All
 
-namespace ConnectionSwitcher
+namespace ConnectionSwitcher.NativeLibraries
 {
     /// <summary>
     /// Native functions from user32.dll
@@ -1252,12 +1251,12 @@ namespace ConnectionSwitcher
     [StructLayout(LayoutKind.Sequential)]
     public struct MSG
     {
-        private IntPtr _handle;
-        private uint _message;
-        private UIntPtr _wParam;
-        private IntPtr _lParam;
-        private int _time;
-        private POINT _point;
+        private IntPtr handle;
+        private uint message;
+        private UIntPtr wParam;
+        private IntPtr lParam;
+        private int time;
+        private POINT point;
 #if _MAC
         private int lPrivate;
 #endif
@@ -1266,8 +1265,8 @@ namespace ConnectionSwitcher
     [StructLayout(LayoutKind.Sequential)]
     public struct POINT
     {
-        private int _x;
-        private int _y;
+        private int x;
+        private int y;
     }
     
     public enum Keys

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ConnectionSwitcher
+namespace ConnectionSwitcher.NativeLibraries
 {
     public interface IIPHelper
     {
         int GetIpForwardTable(IntPtr pIpForwardTable, ref IntPtr pdwSize, bool bOrder);
-        int SetIpForwardEntry(ref IpForwardRow pRoute);
         int CreateIpForwardEntry(ref IpForwardRow pRoute);
         int DeleteIpForwardEntry(ref IpForwardRow pRoute);
     }
@@ -14,9 +13,7 @@ namespace ConnectionSwitcher
     [StructLayout(LayoutKind.Sequential)]
     public struct IpForwardTable {
         public uint Size;
-        
-        [MarshalAs(UnmanagedType.ByValArray)]
-        public IpForwardRow[] table;
+        public IpForwardRow[] Table;
     }
     
     public enum ForwardType
