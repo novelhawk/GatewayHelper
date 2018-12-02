@@ -9,13 +9,14 @@ namespace ConnectionSwitcher
     {
         private HookProc _hook;
         private Switcher _switcher;
+        private IIPHelper _ipHelper;
         private IUser32 _user32;
         private IKernel32 _kernel32;
         
         public Core()
         {
-            InitializeComponents();
             LoadNativeLibraries();
+            InitializeComponents();
             RegisterKeyboardHook();
         }
 
@@ -35,11 +36,11 @@ namespace ConnectionSwitcher
         {
             if (nCode >= 0)
             {
-                KBDLLHOOKSTRUCT kbd = (KBDLLHOOKSTRUCT) Marshal.PtrToStructure(lParam, typeof(KBDLLHOOKSTRUCT));
+                KeyInfo keyInfo = (KeyInfo) Marshal.PtrToStructure(lParam, typeof(KeyInfo));
                 switch (wParam.ToInt32())
                 {
                     case (int) WM.KEYDOWN:
-                        switch (kbd.vkCode)
+                        switch (keyInfo.KeyCode)
                         {
                             case Keys.ControlKey:
                             case Keys.LControlKey:
@@ -56,7 +57,7 @@ namespace ConnectionSwitcher
                         break;
                     
                     case (int) WM.KEYUP:
-                        switch (kbd.vkCode)
+                        switch (keyInfo.KeyCode)
                         {
                             case Keys.ControlKey:
                             case Keys.LControlKey:
@@ -72,8 +73,9 @@ namespace ConnectionSwitcher
 
         private void InitializeComponents()
         {
-            _switcher = new Switcher();
+            _switcher = new Switcher(_ipHelper);
             _switcher.LoadGatewaysFromFile(null);
+            _switcher.LoadCurrentGateway();
         }
 
         private void LoadNativeLibraries()
@@ -82,6 +84,7 @@ namespace ConnectionSwitcher
             
             _user32 = activator.ActivateInterface<IUser32>("user32.dll");
             _kernel32 = activator.ActivateInterface<IKernel32>("kernel32.dll");
+            _ipHelper = activator.ActivateInterface<IIPHelper>("Iphlpapi.dll");
         }
 
         public void ApplicationLoop()
