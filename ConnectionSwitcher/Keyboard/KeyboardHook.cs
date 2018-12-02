@@ -7,12 +7,17 @@ namespace ConnectionSwitcher.Keyboard
 {
     public sealed class KeyboardHook
     {
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private readonly HookProc _hook;
+        // Keep alive the callback by keeping a reference in managed
+        private static HookProc _hook;
         
         private bool _isControlDown;
 
         public KeyboardHook()
+        {
+            SetHook();
+        }
+
+        private void SetHook()
         {
             _hook = LowLevelKeyboardProc;
             using (Process curProcess = Process.GetCurrentProcess())
