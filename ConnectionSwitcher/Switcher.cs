@@ -89,11 +89,6 @@ namespace ConnectionSwitcher
             };
         }
 
-        public Gateway(string ip)
-        {
-            _bytes = IPAddress.Parse(ip).GetAddressBytes();
-        }
-
         public override string ToString()
         {
             return $"{_bytes[0]}.{_bytes[1]}.{_bytes[2]}.{_bytes[3]}";
