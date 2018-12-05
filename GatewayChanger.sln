@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayChanger", "GatewayChanger\GatewayChanger.csproj", "{1D9110FE-5F9E-4E02-88D7-19AEA8A5A24A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayChanger.Test", "GatewayChanger.Test\GatewayChanger.Test.csproj", "{3F646825-6D31-4DFF-80C4-228C922248FA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D9110FE-5F9E-4E02-88D7-19AEA8A5A24A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D9110FE-5F9E-4E02-88D7-19AEA8A5A24A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D9110FE-5F9E-4E02-88D7-19AEA8A5A24A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D9110FE-5F9E-4E02-88D7-19AEA8A5A24A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F646825-6D31-4DFF-80C4-228C922248FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F646825-6D31-4DFF-80C4-228C922248FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F646825-6D31-4DFF-80C4-228C922248FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F646825-6D31-4DFF-80C4-228C922248FA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

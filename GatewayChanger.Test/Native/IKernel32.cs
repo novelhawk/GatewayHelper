@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConnectionSwitcher.NativeLibraries
+namespace GatewayChanger.Test.Native
 {
     public interface IKernel32
     {

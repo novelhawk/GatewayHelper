@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConnectionSwitcher
+namespace GatewayChanger
 {
     public struct Gateway : IEquatable<Gateway>
     {
@@ -26,12 +26,15 @@ namespace ConnectionSwitcher
 
         public override string ToString()
         {
-            return $"{_bytes[0]}.{_bytes[1]}.{_bytes[2]}.{_bytes[3]}";
+            return string.Format("{0}.{1}.{2}.{3}", _bytes[0], _bytes[1], _bytes[2], _bytes[3]);
         }
 
         public bool Equals(Gateway other)
         {
-            return Equals(_bytes, other._bytes);
+            return Equals(_bytes[0], other._bytes[0]) &&
+                   Equals(_bytes[1], other._bytes[1]) &&
+                   Equals(_bytes[2], other._bytes[2]) &&
+                   Equals(_bytes[3], other._bytes[3]);
         }
 
         public override bool Equals(object obj)

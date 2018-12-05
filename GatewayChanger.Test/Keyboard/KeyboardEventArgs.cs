@@ -1,6 +1,6 @@
-﻿using ConnectionSwitcher.NativeLibraries;
+﻿using GatewayChanger.Test.Native.Enums;
 
-namespace ConnectionSwitcher.Keyboard
+namespace GatewayChanger.Test.Keyboard
 {
     public class KeyboardEventArgs
     {

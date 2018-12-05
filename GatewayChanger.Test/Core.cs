@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using ConnectionSwitcher.Keyboard;
-using ConnectionSwitcher.NativeLibraries;
+using GatewayChanger.Test.Keyboard;
+using GatewayChanger.Test.Native;
+using GatewayChanger.Test.Native.Enums;
+using GatewayChanger.Test.Native.Structures;
 
-namespace ConnectionSwitcher
+namespace GatewayChanger.Test
 {
     public class Core
     {
         private KeyboardHook _keyboard;
-        private Switcher _switcher;
+        private GatewayManager _manager;
         
         public Core()
         {
@@ -18,9 +20,9 @@ namespace ConnectionSwitcher
 
         private void InitializeComponents()
         {
-            _switcher = new Switcher();
-            _switcher.LoadGatewaysFromFile(null);
-            _switcher.LoadCurrentGateway();
+            _manager = new GatewayManager();
+            _manager.LoadGatewaysFromFile(null);
+            _manager.EnsureCorrectGateway();
             
             _keyboard = new KeyboardHook();
             _keyboard.KeyDown += OnKeyDown;
@@ -31,10 +33,10 @@ namespace ConnectionSwitcher
             switch (e.Key)
             {
                 case Keys.F11 when e.ControlDown:
-                    _switcher.ChangeGateway();
+                    _manager.UseNext();
                     break;
                 case Keys.F12 when e.ControlDown:
-                    Console.WriteLine("[INFO] Current gateway: {0}", _switcher.Gateway);
+                    Console.WriteLine("[INFO] Current gateway: {0}", _manager.Gateway);
                     break;
             }
         }

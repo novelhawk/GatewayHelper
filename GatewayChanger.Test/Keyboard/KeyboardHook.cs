@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using ConnectionSwitcher.NativeLibraries;
+using GatewayChanger.Test.Native;
+using GatewayChanger.Test.Native.Enums;
+using GatewayChanger.Test.Native.Structures;
 
-namespace ConnectionSwitcher.Keyboard
+namespace GatewayChanger.Test.Keyboard
 {
     public sealed class KeyboardHook
     {
