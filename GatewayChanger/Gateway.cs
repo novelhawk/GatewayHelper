@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace GatewayChanger
 {
@@ -14,14 +15,16 @@ namespace GatewayChanger
             };
         }
 
-        public Gateway(uint ip)
+        public Gateway(long ip)
         {
-            _bytes = BitConverter.GetBytes(ip);
+            _bytes = BitConverter.GetBytes((uint) ip);
         }
         
-        public static implicit operator uint(Gateway gateway)
+        public long Address => BitConverter.ToUInt32(_bytes, 0); 
+
+        public static implicit operator IPAddress(Gateway gateway)
         {
-            return BitConverter.ToUInt32(gateway._bytes, 0);
+            return new IPAddress(gateway._bytes);
         }
 
         public override string ToString()
@@ -31,10 +34,10 @@ namespace GatewayChanger
 
         public bool Equals(Gateway other)
         {
-            return Equals(_bytes[0], other._bytes[0]) &&
-                   Equals(_bytes[1], other._bytes[1]) &&
-                   Equals(_bytes[2], other._bytes[2]) &&
-                   Equals(_bytes[3], other._bytes[3]);
+            for (int i = 0; i < 4; i++)
+                if (!Equals(_bytes[i], other._bytes[i]))
+                    return false;
+            return true;
         }
 
         public override bool Equals(object obj)

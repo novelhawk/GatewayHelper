@@ -77,13 +77,13 @@ namespace GatewayChanger
             var gateways = new Gateway[0];
             foreach (var row in forwardTable)
             {
-                if (row.dwForwardDest == 0)
+                if (row.Destination == 0)
                 {
                     var array = gateways;
                     gateways = new Gateway[gateways.Length + 1];
                     Array.Copy(array, 0, gateways, 1, array.Length);
                     
-                    gateways[0] = new Gateway(row.dwForwardNextHop);
+                    gateways[0] = new Gateway(row.Gateway);
                 }
             }
             return gateways;
@@ -113,7 +113,7 @@ namespace GatewayChanger
             for (int i = 0; i < forwardTable.Length; i++)
             {
                 var row = forwardTable[i];
-                if (row.dwForwardDest == 0)
+                if (row.Destination == 0)
                 {
                     if (currentGateway == null)
                         currentGateway = row;
@@ -136,7 +136,7 @@ namespace GatewayChanger
                 throw new GatewayNotFoundException();
 
             var current = currentGateway.Value;
-            current.dwForwardNextHop = gateway;
+            current.Gateway = gateway.Address;
             
             status = NativeLibrary.IPHelper.CreateIpForwardEntry(ref current);
 
