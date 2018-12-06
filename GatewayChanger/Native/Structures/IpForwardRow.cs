@@ -3,6 +3,9 @@ using GatewayChanger.Native.Enums;
 
 namespace GatewayChanger.Native.Structures
 {
+    /// <summary>
+    /// The MIB_IPFORWARDROW structure equivalent that contains information that describes an IPv4 network route.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct IpForwardRow
     {

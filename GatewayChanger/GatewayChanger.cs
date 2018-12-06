@@ -10,11 +10,11 @@ namespace GatewayChanger
     public static class GatewayChanger
     {
         /// <summary>
-        /// Gets the forward table
+        /// Retrieves the IPv4 routing table
         /// </summary>
-        /// <param name="forwardTable">The forward table</param>
-        /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the forward table</exception>
-        /// <exception cref="EmptyRouteTableException">There are no routes in the forward table</exception>
+        /// <param name="forwardTable">The IPv4 routing table</param>
+        /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the routing table</exception>
+        /// <exception cref="EmptyRouteTableException">There are no routes in the routing table</exception>
         /// <exception cref="NotSupportedException">There is no IP stack installed</exception>
         /// <exception cref="Win32Exception">Error in unmanaged code</exception>
         private static void GetForwardTable(out IpForwardRow[] forwardTable)
@@ -27,7 +27,6 @@ namespace GatewayChanger
             IntPtr buffer = IntPtr.Zero;
             IntPtr bufferSize = IntPtr.Zero;
 
-            //TODO: Use GetIpForwardTable2 to get only IPv4 entries (AF_INET)
             var status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
             if (status == ERROR_INSUFFICIENT_BUFFER)
             {
@@ -64,10 +63,10 @@ namespace GatewayChanger
         }
 
         /// <summary>
-        /// Gets an array of all the gateways on the forward table
+        /// Retrives all the gateways on the IPv4 routing table
         /// </summary>
-        /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the forward table</exception>
-        /// <exception cref="EmptyRouteTableException">There are no routes in the forward table</exception>
+        /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the routing table</exception>
+        /// <exception cref="EmptyRouteTableException">There are no routes in the routing table</exception>
         /// <exception cref="NotSupportedException">There is no IP stack installed</exception>
         /// <exception cref="Win32Exception">Error in unmanaged code</exception>
         public static Gateway[] GetGateways()
@@ -90,13 +89,13 @@ namespace GatewayChanger
         }
 
         /// <summary>
-        /// Deletes every gateway entry from the forward table and creates a new one (with the first as a base) with the specified Gateway 
+        /// Deletes every gateway entry from the IPv4 routing table and creates a new one with the specified <paramref name="gateway"/> 
         /// </summary>
         /// <param name="gateway">The gateway that will be set</param>
-        /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the forward table</exception>
-        /// <exception cref="EmptyRouteTableException">There are no routes in the forward table</exception>
-        /// <exception cref="NotSupportedException">There is no IP stack installed</exception>
-        /// <exception cref="GatewayNotFoundException">There are no gateway entries in the forward table</exception>
+        /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the routing table</exception>
+        /// <exception cref="EmptyRouteTableException">There are no routes in the routing table</exception>
+        /// <exception cref="NotSupportedException">There is no IP stack installed on the local computer</exception>
+        /// <exception cref="GatewayNotFoundException">There are no gateway entries in the routing table</exception>
         /// <exception cref="UnauthorizedAccessException">The application is not running in an enhanced shell</exception>
         /// <exception cref="NotSupportedException">The IPv4 transport is not configured on the local computer</exception>
         /// <exception cref="Win32Exception">Error in unmanaged code</exception>
@@ -118,7 +117,6 @@ namespace GatewayChanger
                     if (currentGateway == null)
                         currentGateway = row;
                         
-                    // Might throw ERROR_INVALID_PARAMETER for IPv6
                     status = NativeLibrary.IPHelper.DeleteIpForwardEntry(ref forwardTable[i]);
 
                     if (status == ERROR_ACCESS_DENIED)
