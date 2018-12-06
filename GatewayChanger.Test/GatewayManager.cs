@@ -44,7 +44,7 @@ namespace GatewayChanger.Test
 
             if (index < 0)
             {
-                Console.WriteLine("[WARNING] Current gateway \"{0}\" is not present in the array, switching to \"{1}\".", current, _gateways[0]);
+                Console.WriteLine("[WARNING] Current gateway \"{0}\" is not present in the array, switching to {1}", current, _gateways[0]);
                 GatewayChanger.ChangeGateway(_gateways[0]);
                 _currentGateway = 0;
             }
@@ -62,6 +62,7 @@ namespace GatewayChanger.Test
             _currentGateway %= _gateways.Length;
 
             GatewayChanger.ChangeGateway(_gateways[_currentGateway]);
+            Console.WriteLine("[INFO] Successfully changed gateway to {0}", _gateways[_currentGateway]);
         }
 
         public Gateway Gateway => _gateways[_currentGateway];
