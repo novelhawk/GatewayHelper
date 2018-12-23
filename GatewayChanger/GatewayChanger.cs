@@ -16,7 +16,7 @@ namespace GatewayChanger
         /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the routing table</exception>
         /// <exception cref="EmptyRouteTableException">There are no routes in the routing table</exception>
         /// <exception cref="NotSupportedException">There is no IP stack installed</exception>
-        /// <exception cref="Win32Exception">Error in unmanaged code</exception>
+        /// <exception cref="Win32Exception">Unexpected error</exception>
         private static void GetForwardTable(out IpForwardRow[] forwardTable)
         {
             const int ERROR_INSUFFICIENT_BUFFER = 122;
@@ -65,10 +65,11 @@ namespace GatewayChanger
         /// <summary>
         /// Retrives all the gateways on the IPv4 routing table
         /// </summary>
+        /// <returns>An array of <see cref="Gateway"/> containing every found gateway</returns>
         /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the routing table</exception>
         /// <exception cref="EmptyRouteTableException">There are no routes in the routing table</exception>
         /// <exception cref="NotSupportedException">There is no IP stack installed</exception>
-        /// <exception cref="Win32Exception">Error in unmanaged code</exception>
+        /// <exception cref="Win32Exception">Unexpected error</exception>
         public static Gateway[] GetGateways()
         {
             GetForwardTable(out IpForwardRow[] forwardTable);
@@ -98,7 +99,7 @@ namespace GatewayChanger
         /// <exception cref="GatewayNotFoundException">There are no gateway entries in the routing table</exception>
         /// <exception cref="UnauthorizedAccessException">The application is not running in an enhanced shell</exception>
         /// <exception cref="NotSupportedException">The IPv4 transport is not configured on the local computer</exception>
-        /// <exception cref="Win32Exception">Error in unmanaged code</exception>
+        /// <exception cref="Win32Exception">Unexpected error</exception>
         public static void ChangeGateway(in Gateway gateway)
         {
             const int NO_ERROR = 0;
