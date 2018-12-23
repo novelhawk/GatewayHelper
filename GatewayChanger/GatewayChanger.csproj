@@ -4,7 +4,6 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AdvancedDLSupport" Version="2.3.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
   </ItemGroup>
 </Project>
