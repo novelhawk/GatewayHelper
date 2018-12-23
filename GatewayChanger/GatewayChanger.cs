@@ -27,39 +27,45 @@ namespace GatewayChanger
             IntPtr buffer = IntPtr.Zero;
             IntPtr bufferSize = IntPtr.Zero;
 
-            var status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
-            if (status == ERROR_INSUFFICIENT_BUFFER)
+            try
             {
-                buffer = Marshal.AllocHGlobal(bufferSize);
-                status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
-            }
+                var status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
+                if (status == ERROR_INSUFFICIENT_BUFFER)
+                {
+                    buffer = Marshal.AllocHGlobal(bufferSize);
+                    status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
+                }
 
-            if (status != NO_ERROR)
+                if (status != NO_ERROR)
+                {
+                    if (buffer != IntPtr.Zero)
+                        Marshal.FreeHGlobal(buffer);
+                    buffer = IntPtr.Zero;
+                    
+                    if (status == ERROR_NO_DATA)
+                        throw new EmptyRouteTableException();
+
+                    if (status == ERROR_NOT_SUPPORTED)
+                        throw new NotSupportedException("There is no IP stack installed on the local computer.");
+
+                    throw new Win32Exception(status);
+                }
+
+                var size = (uint) Marshal.ReadInt32(buffer);
+                forwardTable = new IpForwardRow[size];
+
+                IntPtr currentPointer = buffer + sizeof(uint);
+                for (int i = 0; i < size; i++)
+                {
+                    forwardTable[i] = Marshal.PtrToStructure<IpForwardRow>(currentPointer);
+                    currentPointer += Marshal.SizeOf<IpForwardRow>();
+                }
+            }
+            finally
             {
                 if (buffer != IntPtr.Zero)
                     Marshal.FreeHGlobal(buffer);
-                
-                if (status == ERROR_NO_DATA)
-                    throw new EmptyRouteTableException();
-                
-                if (status == ERROR_NOT_SUPPORTED)
-                    throw new NotSupportedException("There is no IP stack installed on the local computer.");
-                
-                throw new Win32Exception(status);
             }
-
-            var size = (uint) Marshal.ReadInt32(buffer);
-            forwardTable = new IpForwardRow[size];
-            
-            IntPtr currentIndex = buffer + sizeof(uint);
-            for (int i = 0; i < size; i++)
-            {
-                forwardTable[i] = Marshal.PtrToStructure<IpForwardRow>(currentIndex);
-                currentIndex += Marshal.SizeOf<IpForwardRow>();
-            }
-            
-            if (buffer != IntPtr.Zero)
-                Marshal.FreeHGlobal(buffer);
         }
 
         /// <summary>
