@@ -1,14 +1,16 @@
-﻿namespace GatewayChanger.Native
+﻿using AdvancedDLSupport;
+
+namespace GatewayChanger.Native
 {
     internal static class NativeLibrary
     {
-        private static readonly IIPHelper _ipHelper;
+        public static readonly IIPHelper IPHelper;
 
         static NativeLibrary()
         {
-            _ipHelper = new IPHelper();
+            var activator = new NativeLibraryBuilder();
+
+            IPHelper = activator.ActivateInterface<IIPHelper>("Iphlpapi.dll");
         }
-        
-        public static IIPHelper IPHelper => _ipHelper;
     }
 }

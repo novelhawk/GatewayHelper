@@ -44,7 +44,6 @@ namespace GatewayChanger
                     
                     if (status == ERROR_NO_DATA)
                         throw new EmptyRouteTableException();
-
                     if (status == ERROR_NOT_SUPPORTED)
                         throw new NotSupportedException("There is no IP stack installed on the local computer.");
 
@@ -69,7 +68,7 @@ namespace GatewayChanger
         }
 
         /// <summary>
-        /// Retrives all the gateways on the IPv4 routing table
+        /// Retrieves all the gateways on the IPv4 routing table
         /// </summary>
         /// <returns>An array of <see cref="Gateway"/> containing every found gateway</returns>
         /// <exception cref="OutOfMemoryException">Could not allocate a buffer that can store the routing table</exception>
@@ -128,7 +127,6 @@ namespace GatewayChanger
 
                     if (status == ERROR_ACCESS_DENIED)
                         throw new UnauthorizedAccessException();
-                    
                     if (status == ERROR_NOT_SUPPORTED)
                         throw new NotSupportedException("The IPv4 transport is not configured on the local computer.");
                     
@@ -145,14 +143,15 @@ namespace GatewayChanger
             
             status = NativeLibrary.IPHelper.CreateIpForwardEntry(ref current);
 
-            if (status == ERROR_ACCESS_DENIED)
-                throw new UnauthorizedAccessException();
-            
-            if (status == ERROR_NOT_SUPPORTED)
-                throw new NotSupportedException("The IPv4 transport is not configured on the local computer.");
-            
             if (status != NO_ERROR)
+            {
+                if (status == ERROR_ACCESS_DENIED)
+                    throw new UnauthorizedAccessException();
+                if (status == ERROR_NOT_SUPPORTED)
+                    throw new NotSupportedException("The IPv4 transport is not configured on the local computer.");
+                
                 throw new Win32Exception(status);
+            }
         }
     }
 }
