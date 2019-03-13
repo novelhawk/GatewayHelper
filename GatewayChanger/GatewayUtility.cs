@@ -7,7 +7,7 @@ using GatewayChanger.Native.Structures;
 
 namespace GatewayChanger
 {
-    public static class GatewayChanger
+    public static class GatewayUtility
     {
         /// <summary>
         /// Retrieves the IPv4 routing table
