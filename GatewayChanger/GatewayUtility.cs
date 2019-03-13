@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using GatewayChanger.Exceptions;
 using GatewayChanger.Native;
+using GatewayChanger.Native.Constants;
 using GatewayChanger.Native.Structures;
 
 namespace GatewayChanger
@@ -19,32 +20,27 @@ namespace GatewayChanger
         /// <exception cref="Win32Exception">Unexpected error</exception>
         private static void GetForwardTable(out IpForwardRow[] forwardTable)
         {
-            const int ERROR_INSUFFICIENT_BUFFER = 122;
-            const int ERROR_NOT_SUPPORTED = 50;
-            const int ERROR_NO_DATA = 232;
-            const int NO_ERROR = 0;
-
             IntPtr buffer = IntPtr.Zero;
             IntPtr bufferSize = IntPtr.Zero;
 
             try
             {
                 var status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
-                if (status == ERROR_INSUFFICIENT_BUFFER)
+                if (status == Error.InsufficientBuffer)
                 {
                     buffer = Marshal.AllocHGlobal(bufferSize);
                     status = NativeLibrary.IPHelper.GetIpForwardTable(buffer, ref bufferSize, false);
                 }
 
-                if (status != NO_ERROR)
+                if (status != Error.None)
                 {
                     if (buffer != IntPtr.Zero)
                         Marshal.FreeHGlobal(buffer);
                     buffer = IntPtr.Zero;
                     
-                    if (status == ERROR_NO_DATA)
+                    if (status == Error.NoData)
                         throw new EmptyRouteTableException();
-                    if (status == ERROR_NOT_SUPPORTED)
+                    if (status == Error.NotSupported)
                         throw new NotSupportedException("There is no IP stack installed on the local computer.");
 
                     throw new Win32Exception(status);
@@ -107,10 +103,6 @@ namespace GatewayChanger
         /// <exception cref="Win32Exception">Unexpected error</exception>
         public static void ChangeGateway(in Gateway gateway)
         {
-            const int NO_ERROR = 0;
-            const int ERROR_ACCESS_DENIED = 5;
-            const int ERROR_NOT_SUPPORTED = 50;
-
             GetForwardTable(out IpForwardRow[] forwardTable);
             
             int status;
@@ -125,12 +117,12 @@ namespace GatewayChanger
                         
                     status = NativeLibrary.IPHelper.DeleteIpForwardEntry(ref forwardTable[i]);
 
-                    if (status == ERROR_ACCESS_DENIED)
+                    if (status == Error.AccessDenied)
                         throw new UnauthorizedAccessException();
-                    if (status == ERROR_NOT_SUPPORTED)
+                    if (status == Error.NotSupported)
                         throw new NotSupportedException("The IPv4 transport is not configured on the local computer.");
                     
-                    if (status != NO_ERROR)
+                    if (status != Error.None)
                         throw new Win32Exception(status);
                 }
             }
@@ -143,11 +135,11 @@ namespace GatewayChanger
             
             status = NativeLibrary.IPHelper.CreateIpForwardEntry(ref current);
 
-            if (status != NO_ERROR)
+            if (status != Error.None)
             {
-                if (status == ERROR_ACCESS_DENIED)
+                if (status == Error.AccessDenied)
                     throw new UnauthorizedAccessException();
-                if (status == ERROR_NOT_SUPPORTED)
+                if (status == Error.NotSupported)
                     throw new NotSupportedException("The IPv4 transport is not configured on the local computer.");
                 
                 throw new Win32Exception(status);
