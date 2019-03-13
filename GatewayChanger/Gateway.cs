@@ -5,50 +5,75 @@ namespace GatewayChanger
 {
     public struct Gateway : IEquatable<Gateway>
     {
-        private readonly byte[] _bytes;
+        private readonly byte _first;
+        private readonly byte _second;
+        private readonly byte _third;
+        private readonly byte _fourth;
 
         public Gateway(byte first, byte second, byte third, byte fourth)
-        {
-            _bytes = new[]
-            {
-                first, second, third, fourth
-            };
+        {    
+            _first = first;
+            _second = second;
+            _third = third;
+            _fourth = fourth;
         }
 
         public Gateway(long ip)
         {
-            _bytes = BitConverter.GetBytes((uint) ip);
+            var bytes = BitConverter.GetBytes((uint) ip);
+            _first = bytes[0];
+            _second = bytes[1];
+            _third = bytes[2];
+            _fourth = bytes[3];
         }
         
-        public long Address => BitConverter.ToUInt32(_bytes, 0); 
+        public byte[] Bytes => new[] {_first, _second, _third, _fourth};
+
+        public long Address
+        {
+            get
+            {
+                return _first << 24 | 
+                       _second << 16 | 
+                       _third << 8 | 
+                       _fourth << 0;
+            }
+        }
 
         public static implicit operator IPAddress(Gateway gateway)
         {
-            return new IPAddress(gateway._bytes);
+            return new IPAddress(gateway.Address);
         }
 
         public override string ToString()
         {
-            return string.Format("{0}.{1}.{2}.{3}", _bytes[0], _bytes[1], _bytes[2], _bytes[3]);
+            return string.Format("{0}.{1}.{2}.{3}", _first, _second, _third, _fourth);
         }
 
         public bool Equals(Gateway other)
         {
-            for (int i = 0; i < 4; i++)
-                if (!Equals(_bytes[i], other._bytes[i]))
-                    return false;
-            return true;
+            return _first == other._first && 
+                   _second == other._second && 
+                   _third == other._third && 
+                   _fourth == other._fourth;
         }
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is Gateway gateway && Equals(gateway);
+            return obj is Gateway other && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return _bytes != null ? _bytes.GetHashCode() : 0;
+            unchecked
+            {
+                var hashCode = _first.GetHashCode();
+                hashCode = (hashCode * 397) ^ _second.GetHashCode();
+                hashCode = (hashCode * 397) ^ _third.GetHashCode();
+                hashCode = (hashCode * 397) ^ _fourth.GetHashCode();
+                return hashCode;
+            }
         }
     }
 }
