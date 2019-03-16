@@ -12,19 +12,18 @@ namespace GatewayChanger
 
         public Gateway(byte first, byte second, byte third, byte fourth)
         {    
-            _first = first;
+            _first  = first;
             _second = second;
-            _third = third;
+            _third  = third;
             _fourth = fourth;
         }
 
         public Gateway(long ip)
         {
-            var bytes = BitConverter.GetBytes((uint) ip);
-            _first = bytes[0];
-            _second = bytes[1];
-            _third = bytes[2];
-            _fourth = bytes[3];
+            _first  = (byte) (ip >> 0);
+            _second = (byte) (ip >> 8);
+            _third  = (byte) (ip >> 16);
+            _fourth = (byte) (ip >> 24);
         }
         
         public byte[] Bytes => new[] {_first, _second, _third, _fourth};
@@ -33,10 +32,11 @@ namespace GatewayChanger
         {
             get
             {
-                return _first << 24 | 
-                       _second << 16 | 
-                       _third << 8 | 
-                       _fourth << 0;
+                long address = _first;
+                address |= _second << 8;
+                address |= _third << 16;
+                address |= _fourth << 24;
+                 return address;
             }
         }
 
