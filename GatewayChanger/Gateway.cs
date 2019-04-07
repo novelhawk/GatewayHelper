@@ -32,11 +32,11 @@ namespace GatewayChanger
         {
             get
             {
-                long address = _first;
-                address |= _second << 8;
-                address |= _third << 16;
-                address |= _fourth << 24;
-                 return address;
+                uint address = _first;
+                address |= (uint) (_second << 8);
+                address |= (uint) (_third << 16);
+                address |= (uint) (_fourth << 24);
+                return address;
             }
         }
 
