@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using AdvancedDLSupport;
-using GatewayChanger.Native.Structures;
+using GatewayHelper.Native.Structures;
 
-namespace GatewayChanger.Native
+namespace GatewayHelper.Native
 {
     public interface IIPHelper
     {

@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
-using GatewayChanger.Native.Enums;
+using GatewayHelper.Native.Enums;
 
-namespace GatewayChanger.Native.Structures
+namespace GatewayHelper.Native.Structures
 {
     /// <summary>
     /// The MIB_IPFORWARDROW structure equivalent that contains information that describes an IPv4 network route.

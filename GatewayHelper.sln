@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayChanger", "GatewayChanger\GatewayChanger.csproj", "{1D9110FE-5F9E-4E02-88D7-19AEA8A5A24A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayHelper", "GatewayHelper\GatewayHelper.csproj", "{1D9110FE-5F9E-4E02-88D7-19AEA8A5A24A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

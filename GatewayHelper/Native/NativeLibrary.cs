@@ -1,6 +1,6 @@
 ﻿using AdvancedDLSupport;
 
-namespace GatewayChanger.Native
+namespace GatewayHelper.Native
 {
     internal static class NativeLibrary
     {

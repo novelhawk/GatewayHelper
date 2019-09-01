@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace GatewayChanger
+namespace GatewayHelper
 {
     public struct Gateway : IEquatable<Gateway>
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GatewayChanger.Exceptions
+namespace GatewayHelper.Exceptions
 {
     public class GatewayNotFoundException : Exception
     {

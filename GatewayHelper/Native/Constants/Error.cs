@@ -1,4 +1,4 @@
-namespace GatewayChanger.Native.Constants
+namespace GatewayHelper.Native.Constants
 {
     internal static class Error
     {

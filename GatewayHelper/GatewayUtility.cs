@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using GatewayChanger.Exceptions;
-using GatewayChanger.Native;
-using GatewayChanger.Native.Constants;
-using GatewayChanger.Native.Structures;
+using GatewayHelper.Exceptions;
+using GatewayHelper.Native;
+using GatewayHelper.Native.Constants;
+using GatewayHelper.Native.Structures;
 
-namespace GatewayChanger
+namespace GatewayHelper
 {
     public static class GatewayUtility
     {

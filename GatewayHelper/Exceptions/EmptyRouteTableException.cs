@@ -1,8 +1,7 @@
 ﻿using System.ComponentModel;
-using GatewayChanger.Native;
-using GatewayChanger.Native.Constants;
+using GatewayHelper.Native.Constants;
 
-namespace GatewayChanger.Exceptions
+namespace GatewayHelper.Exceptions
 {
     public class EmptyRouteTableException : Win32Exception
     {

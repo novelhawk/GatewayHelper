@@ -1,4 +1,4 @@
-﻿namespace GatewayChanger.Native.Enums
+﻿namespace GatewayHelper.Native.Enums
 {
     public enum ForwardProtocol
     {
